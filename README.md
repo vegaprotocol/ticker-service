@@ -1,3 +1,3 @@
-# Ticket service
+# Ticker service
 
-A very simple caching ticket service for Fairground
+A very simple caching ticker service for Fairground
