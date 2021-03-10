@@ -1,0 +1,1 @@
+{"id":"1fee7412-48c0-45f1-ba8c-949a08884dcf","space":3329,"runtime":"python3.7","name":"ticker","path":"q1rjrw","project":"a0xkh1jc","account":"144798365827","region":"eu-west-2","deps":["fastapi","pydantic[dotenv]","cachetools"],"envs":null,"public":true,"log_level":"debug","cron":"","reload_deps":false}
