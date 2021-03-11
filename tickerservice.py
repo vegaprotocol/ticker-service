@@ -18,11 +18,11 @@ class Config(BaseSettings):
 	change_duration: int
 	history_granularity: str
 	history_step: int
-	
+
 	@property
 	def change_interval(self):
 		return sorted([x for x in INTERVAL.items() if x[1] <= self.change_duration], key=lambda x: x[1])[-1][0]
-		
+
 config = Config(_env_file='.env')
 
 
@@ -30,7 +30,7 @@ def cached(ttl):
 	def _cached(f):
 		return cachetools.cached(cache=cachetools.TTLCache(config.cache_size, ttl))(f)
 	return _cached
-	
+
 
 class API:
 	MARKETS = (config.node_url + '/markets').format
