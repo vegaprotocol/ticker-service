@@ -8,4 +8,4 @@ This repository is a community contirbution and may not actively monitored by it
 
 A very simple caching ticker service for Fairground. 
 
-Might be running at https://ticker.barnab.ee (try [/docs](https://ticker.barnab.ee/docs) or try [/ticker](https://ticker.barnab.ee/ticker)).
+Might be running at https://ticker.barnab.ee (try [/docs](https://ticker.barnab.ee/docs) or [/ticker](https://ticker.barnab.ee/ticker)).
