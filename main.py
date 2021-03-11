@@ -11,21 +11,21 @@ app = FastAPI(
 )
 
 
-td = TickerService()
+ts = TickerService()
 
 @app.get('/ticker', response_model=List[TickerEntry])
 def get_ticker(history: bool=True):
 	"""
 	Returns name, symbol (code) for active markets plus current (close) price and 24hr change and volume details.
 	"""
-	return td.ticker(history=history)
+	return ts.ticker(history=history)
 
 @app.get('/ticker/{market_id}', response_model=TickerEntry)
 def get_ticker_entry(market_id: str, history: bool=True):
 	"""
 	Returns the ticker entry (name, code, price, 24hr change and volume) for a given market ID
 	"""
-	if (res := td.ticker_entry(market_id=market_id, history=history)) is None:
+	if (res := ts.ticker_entry(market_id=market_id, history=history)) is None:
 		raise HTTPException(status_code=404, detail=f'No active market found: {market_id}')
 	else:
 		return res
@@ -35,4 +35,4 @@ def get_markets():
 	"""
 	Returns full details for all active markets on Fairground
 	"""
-	return td.markets()
+	return ts.markets()
