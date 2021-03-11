@@ -1,4 +1,4 @@
-from typing import List, Literal, Set
+from typing import List, Literal, Optional, Set
 from pydantic.main import BaseModel
 from requests import get
 from datetime import datetime
@@ -21,7 +21,7 @@ INTERVAL = {
 class Config(BaseSettings):
 	node_url: str
 	market_cache_ttl: int
-	graph_cache_ttl: int
+	history_cache_ttl: int
 	cache_size: int
 	exclude_market_states: Set[str] 
 	change_duration: int
@@ -67,7 +67,7 @@ class TickerEntry(BaseModel):
 	code: str
 	name: str
 	price_data: PriceData
-	history: List[float]
+	history: Optional[List[float]]
 
 
 class TickerService:
@@ -122,7 +122,7 @@ class TickerService:
 			granularity=config.change_interval)
 		return candles and self.enrich_candle(self.zip_candles(candles)[0])
 
-	@cached(config.graph_cache_ttl)
+	@cached(config.history_cache_ttl)
 	def price_history(self, market_id):
 		return [x['close'] for x in 
 				self.zip_candles(
@@ -133,18 +133,18 @@ class TickerService:
 					step=config.history_step)]
 
 	@cached(config.market_cache_ttl)
-	def ticker(self):
-		return [self.ticker_entry(id) for id in self.market_lookup.keys()]
+	def ticker(self, history=True):
+		return [self.ticker_entry(market_id=id, history=history) for id in self.market_lookup.keys()]
 
 	@cached(config.market_cache_ttl)
-	def ticker_entry(self, market_id: str) -> TickerEntry:
+	def ticker_entry(self, market_id: str, history=True) -> TickerEntry:
 		market = self.market_lookup.get(market_id, None)
 		return market and {
 			'id': market['id'],
 			'code': market['tradableInstrument']['instrument']['code'],
 			'name': market['tradableInstrument']['instrument']['name'],
 			'price_data': self.price_data_for_market(market_id=market_id),
-			'history': self.price_history(market_id=market_id)
+			**({ 'history': self.price_history(market_id=market_id) } if history else {})
 		}
 
 	@cached(config.market_cache_ttl)
