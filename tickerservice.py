@@ -2,20 +2,11 @@ from typing import List, Literal, Optional, Set
 from pydantic.main import BaseModel
 from requests import get
 from datetime import datetime
-from functools import partial
 
 import cachetools
 from pydantic import BaseSettings
 
-
-INTERVAL = {
-	'INTERVAL_I1M': 60,
-	'INTERVAL_I5M': 300,
-	'INTERVAL_I15M': 900,
-	'INTERVAL_I1H': 3_600,
-	'INTERVAL_I6H': 21_600,
-	'INTERVAL_I1D': 86_400
-}
+from candles import *
 
 
 class Config(BaseSettings):
@@ -44,11 +35,6 @@ def cached(ttl):
 class API:
 	MARKETS = (config.node_url + '/markets').format
 	MARKET_DATA = (config.node_url + '/markets-data/{market_id}').format
-	MARKET_CANDLES = (config.node_url + '/markets/{market_id}/candles?since_timestamp={since_timestamp:.0f}&interval={interval}').format
-
-
-PRICE_FLOAT_FIELDS = ['open', 'close', 'high', 'low']
-PRICE_INT_FIELDS = ['volume']
 
 
 class PriceData(BaseModel):
@@ -76,60 +62,26 @@ class TickerService:
 		all_markets = get(API.MARKETS()).json()['markets']
 		return { m['id']:m for m in all_markets if m['state'] not in config.exclude_market_states }
 
-	def candles(self, *, market_id, duration, granularity, step=1):
-		period_start = (datetime.now().timestamp() - duration) * (10 ** 9) 
-		req = API.MARKET_CANDLES(market_id=market_id, since_timestamp=period_start, interval=granularity)
-		if len(candles := get(req).json()['candles']) == 0: return None
-		decimals = int(self.market_lookup[market_id]['decimalPlaces'])
-		return list(map(partial(self.process_candle_data, decimals=decimals), candles))
-
-	def process_candle_data(self, candle, decimals):
-		del candle['timestamp']
-		del candle['interval']
-		for k, v in candle.items():
-			if k in PRICE_FLOAT_FIELDS:
-				candle[k] = float(v) / (10 ** decimals) 
-			elif k in PRICE_INT_FIELDS:
-				candle[k] = int(v)
-		return candle
-
-	def enrich_candle(self, candle):
-		candle ['change'] = (candle['close'] - candle['open']) / candle['open']
-		candle['action'] = \
-			'gainer' if candle['close'] > candle['open'] else \
-			'loser' if candle['close'] < candle['open'] else 'no change'
-		return candle
-
-	def zip_candles(self, candles, step=None):
-		res, chunk, rest = [], [], list(candles)
-		while len(rest) > 0:
-			chunk, rest = rest[:step or len(candles)], rest[step or len(candles):]
-			res.append({
-				'datetime': chunk[-1]['datetime'],
-				'open': chunk[0]['open'],
-				'high': max(x['high'] for x in chunk),
-				'low': min(x['low'] for x in chunk),
-				'close': chunk[-1]['close'],
-				'volume': sum(x['volume'] for x in chunk),
-			})
-		return res
-
 	@cached(config.market_cache_ttl)
 	def price_data_for_market(self, market_id):
-		candles = self.candles(
+		c = candles(
+			node_url=config.node_url,
 			market_id=market_id, 
 			duration=config.change_duration, 
-			granularity=config.change_interval)
-		return candles and self.enrich_candle(self.zip_candles(candles)[0])
+			granularity=config.change_interval, 
+			decimals=int(self.market_lookup[market_id]['decimalPlaces']))
+		return c and enrich_candle(zip_candles(c)[0])
 
 	@cached(config.history_cache_ttl)
 	def price_history(self, market_id):
 		return [x['close'] for x in 
-				self.zip_candles(
-					self.candles(
+				zip_candles(
+					candles(
+							node_url=config.node_url,
 							market_id=market_id, 
 							duration=config.change_duration, 
-							granularity=config.history_granularity), 
+							granularity=config.history_granularity,
+							decimals=int(self.market_lookup[market_id]['decimalPlaces'])), 
 					step=config.history_step)]
 
 	@cached(config.market_cache_ttl)
