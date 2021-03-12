@@ -1,14 +1,16 @@
 from typing import List
 from fastapi import FastAPI, HTTPException
-from pydantic.types import Json
-from starlette.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from tickerservice import TickerService, TickerEntry
+
 
 
 app = FastAPI(
 	title='Vega ticker service', version='0.0.1',
 	docs_url=None, redoc_url='/docs',
 )
+
+app.add_middleware(CORSMiddleware, allow_origins=['*'])
 
 
 ts = TickerService()
