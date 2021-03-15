@@ -13,6 +13,7 @@ class Config(BaseSettings):
 	node_url: str
 	market_cache_ttl: int
 	history_cache_ttl: int
+	stats_cache_ttl: int
 	cache_size: int
 	exclude_market_states: Set[str] 
 	change_duration: int
@@ -35,6 +36,7 @@ def cached(ttl):
 class API:
 	MARKETS = (config.node_url + '/markets').format
 	MARKET_DATA = (config.node_url + '/markets-data/{market_id}').format
+	STATS = (config.node_url + '/statistics').format
 
 
 class PriceData(BaseModel):
@@ -102,3 +104,7 @@ class TickerService:
 	@cached(config.market_cache_ttl)
 	def markets(self):
 		return list(self.market_lookup.values())
+
+	@cached(config.stats_cache_ttl)
+	def stats(self):
+		return get(API.STATS()).json()['statistics']	

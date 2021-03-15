@@ -38,3 +38,10 @@ def get_markets():
 	Returns full details for all active markets on Fairground
 	"""
 	return ts.markets()
+
+@app.get('/stats')
+def get_stats():
+	"""
+	Returns Fairground network statistics
+	"""
+	return ts.stats()
