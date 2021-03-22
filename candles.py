@@ -42,7 +42,7 @@ def enrich_candle(candle):
 	return candle
 
 def zip_candles(candles, *, step=None):
-	res, chunk, rest = [], [], list(candles)
+	res, chunk, rest = [], [], list(candles or [])
 	while len(rest) > 0:
 		chunk, rest = rest[:step or len(candles)], rest[step or len(candles):]
 		res.append({

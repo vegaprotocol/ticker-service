@@ -54,7 +54,8 @@ class TickerEntry(BaseModel):
 	id: str
 	code: str
 	name: str
-	price_data: PriceData
+	status: str
+	price_data: Optional[PriceData]
 	history: Optional[List[float]]
 
 
@@ -88,7 +89,7 @@ class TickerService:
 
 	@cached(config.market_cache_ttl)
 	def ticker(self, history=True):
-		return [self.ticker_entry(market_id=id, history=history) for id in self.market_lookup.keys()]
+		return [x for x in [self.ticker_entry(market_id=id, history=history) for id in self.market_lookup.keys()] if x['price_data']]
 
 	@cached(config.market_cache_ttl)
 	def ticker_entry(self, market_id: str, history=True) -> TickerEntry:
@@ -97,6 +98,7 @@ class TickerService:
 			'id': market['id'],
 			'code': market['tradableInstrument']['instrument']['code'],
 			'name': market['tradableInstrument']['instrument']['name'],
+      'status': market['state'],
 			'price_data': self.price_data_for_market(market_id=market_id),
 			**({ 'history': self.price_history(market_id=market_id) } if history else {})
 		}
