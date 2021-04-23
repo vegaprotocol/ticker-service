@@ -8,4 +8,4 @@ This repository is a community contribution and may not actively monitored by it
 
 A very simple caching ticker service for Fairground. 
 
-Might be running at https://ticker.vega.win (try [/docs](https://ticker.vega.win/docs) or [/ticker](https://ticker.vega.win/ticker)).
+Might be running at https://ticker.vega.win (try [/docs](https://ticker.vega.win/docs) or [/ticker](https://ticker.vega.win/ticker) or [/news](https://ticker.vega.win/news)).
