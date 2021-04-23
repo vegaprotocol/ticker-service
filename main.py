@@ -1,8 +1,8 @@
+from news import NewsItem
 from typing import List
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from tickerservice import TickerService, TickerEntry
-
 
 
 app = FastAPI(
@@ -14,6 +14,7 @@ app.add_middleware(CORSMiddleware, allow_origins=['*'])
 
 
 ts = TickerService()
+
 
 @app.get('/ticker', response_model=List[TickerEntry])
 def get_ticker(history: bool=True):
@@ -45,3 +46,10 @@ def get_stats():
 	Returns Fairground network statistics
 	"""
 	return ts.stats()
+
+@app.get('/news', response_model=List[NewsItem])
+def get_news():
+	"""
+	Returns news announcements
+	"""
+	return ts.news()

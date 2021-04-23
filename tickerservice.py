@@ -3,22 +3,28 @@ from pydantic.main import BaseModel
 from requests import get
 from datetime import datetime
 
+
 import cachetools
 from pydantic import BaseSettings
 
 from candles import *
+import news_market_data
+import news_markets
+import news_proposals
 
 
 class Config(BaseSettings):
 	node_url: str
 	market_cache_ttl: int
 	history_cache_ttl: int
+	news_cache_ttl: int
 	stats_cache_ttl: int
 	cache_size: int
 	exclude_market_states: Set[str] 
 	change_duration: int
 	history_granularity: str
 	history_step: int
+	heartbeat_time: float
 
 	@property
 	def change_interval(self):
@@ -110,3 +116,12 @@ class TickerService:
 	@cached(config.stats_cache_ttl)
 	def stats(self):
 		return get(API.STATS()).json()['statistics']	
+
+	@cached(config.news_cache_ttl)
+	def news(self):		
+		sources = [news_market_data, news_markets, news_proposals]
+		news = []
+		for source in sources:
+			news.extend(source.get_news(config.node_url))
+		return sorted(news, key=lambda x: x.timestamp)
+	
