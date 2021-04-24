@@ -6,7 +6,7 @@ from tickerservice import TickerService, TickerEntry
 
 
 app = FastAPI(
-	title='Vega ticker service', version='0.0.1',
+	title='Vega ticker service', version='0.0.2',
 	docs_url=None, redoc_url='/docs',
 )
 
