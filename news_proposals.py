@@ -63,6 +63,7 @@ def new_market_news(p, ph):
 				type=ItemType.market_proposal, 
 				subtype='proposed', 
 				message=f'New market proposed: {name}',
+				subject=name,
 				url=console_urls.proposal(p['proposal']['id']))
 		else:
 			return NewsItem(
@@ -70,6 +71,7 @@ def new_market_news(p, ph):
 				type=ItemType.market_proposal, 
 				subtype='closing', 
 				message=f'Voting on new market closes soon: {name}',
+				subject=name,
 				url=console_urls.proposal(p['proposal']['id']))
 	elif state in ['STATE_DECLINED', 'STATE_FAILED']:
 		return NewsItem(
@@ -77,6 +79,7 @@ def new_market_news(p, ph):
 			type=ItemType.market_proposal, 
 			subtype='failed', 
 			message=f'New market failed to win approval: {name}',
+				subject=name,
 			url=console_urls.proposal(p['proposal']['id']))
 	elif state in ['STATE_PASSED']:
 		return NewsItem(
@@ -84,6 +87,7 @@ def new_market_news(p, ph):
 			type=ItemType.market_proposal, 
 			subtype='passed', 
 			message=f'New market approved: {name}',
+				subject=name,
 			url=console_urls.proposal(p['proposal']['id']))
 	else:
 		return None

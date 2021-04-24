@@ -27,6 +27,7 @@ def get_market_news(lookup, m):
 			type=ItemType.market_status,
 			subtype='liquidity_auction',
 			message=f'Market entered liquidity monitoring auction: {name}',
+			subject=name,
 			url=console_urls.market(mkt['id']))		
 	elif auction_start != 0 and auction_trigger == 'AUCTION_TRIGGER_PRICE':
 		return NewsItem(
@@ -34,6 +35,7 @@ def get_market_news(lookup, m):
 			type=ItemType.market_status,
 			subtype='price_auction',
 			message=f'Market entered price monitoring auction: {name}',
+			subject=name,
 			url=console_urls.market(mkt['id']))			
 	else:
 		return None

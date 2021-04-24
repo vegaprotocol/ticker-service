@@ -19,4 +19,5 @@ class NewsItem(BaseModel):
 	timestamp: datetime
 	type: ItemType
 	subtype: Optional[str]
+	subject: str
 	url: Optional[str]

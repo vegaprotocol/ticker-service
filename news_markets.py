@@ -25,6 +25,7 @@ def get_market_news(m):
 			type=ItemType.market_status,
 			subtype='closed',
 			message=f'Market closed for trading: {name}',
+			subject=name,
 			url=console_urls.market(m['id']))
 	elif open < now:
 		return NewsItem(
@@ -32,12 +33,14 @@ def get_market_news(m):
 			type=ItemType.market_status,
 			subtype='opened',
 			message=f'New market open for trading: {name}',
+			subject=name,
 			url=console_urls.market(m['id']))
 	elif pending < now:
 		return NewsItem(
 			timestamp=pending,
 			type=ItemType.market_status,
 			subtype='opening',
+			subject=name,
 			message=f'New market in opening auction: {name}',
 			url=console_urls.market(m['id']))
 	else:

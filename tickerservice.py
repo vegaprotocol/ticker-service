@@ -24,7 +24,6 @@ class Config(BaseSettings):
 	change_duration: int
 	history_granularity: str
 	history_step: int
-	heartbeat_time: float
 
 	@property
 	def change_interval(self):
