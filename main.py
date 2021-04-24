@@ -16,14 +16,14 @@ app.add_middleware(CORSMiddleware, allow_origins=['*'])
 ts = TickerService()
 
 
-@app.get('/ticker', response_model=List[TickerEntry])
+@app.get('/ticker', response_model=List[TickerEntry], response_model_exclude_unset=True)
 def get_ticker(history: bool=True):
 	"""
 	Returns name, symbol (code) for active markets plus current (close) price and 24hr change and volume details.
 	"""
 	return ts.ticker(history=history)
 
-@app.get('/ticker/{market_id}', response_model=TickerEntry)
+@app.get('/ticker/{market_id}', response_model=TickerEntry, response_model_exclude_unset=True)
 def get_ticker_entry(market_id: str, history: bool=True):
 	"""
 	Returns the ticker entry (name, code, price, 24hr change and volume) for a given market ID
@@ -47,7 +47,7 @@ def get_stats():
 	"""
 	return ts.stats()
 
-@app.get('/news', response_model=List[NewsItem])
+@app.get('/news', response_model=List[NewsItem], response_model_exclude_unset=True)
 def get_news():
 	"""
 	Returns news announcements
