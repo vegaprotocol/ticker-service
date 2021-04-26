@@ -1,8 +1,10 @@
+from news import NewsItem
 from typing import List, Literal, Optional, Set
 from pydantic.main import BaseModel
 from requests import get
 from datetime import datetime
-
+from time import sleep
+import multiprocessing
 
 import cachetools
 from pydantic import BaseSettings
@@ -24,6 +26,7 @@ class Config(BaseSettings):
 	change_duration: int
 	history_granularity: str
 	history_step: int
+	update_freq: float
 
 	@property
 	def change_interval(self):
@@ -65,23 +68,42 @@ class TickerEntry(BaseModel):
 
 
 class TickerService:
-	@property
-	def market_lookup(self):
-		all_markets = get(API.MARKETS()).json()['markets']
-		return { m['id']:m for m in all_markets if m['state'] not in config.exclude_market_states }
+	def __init__(self):
+		self._data_mutex = multiprocessing.Lock()
+		self.update()
+		multiprocessing.Process(target=self.update_periodically, args=()).start()
 
-	@cached(config.market_cache_ttl)
-	def price_data_for_market(self, market_id):
+	def update_periodically(self):
+		while True:
+			sleep(config.update_freq)
+			self.update()
+
+	def update(self):
+		print(f'Started updating ticker data')
+		all_markets = get(API.MARKETS()).json()['markets']
+		market_lookup = { m['id']:m for m in all_markets if m['state'] not in config.exclude_market_states }
+		price_details = { id:self._get_price_data(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
+		price_history = { id:self._get_price_history(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
+		news = self._get_news()
+
+		with self._data_mutex:
+			self._all_markets = all_markets
+			self._market_lookup = market_lookup
+			self._price_details = price_details
+			self._price_history = price_history
+			self._news = news
+		print(f'Update complete: {len(self._all_markets)} markets, {len(self._news)} news items')
+
+	def _get_price_data(self, market_id, decimals):
 		c = candles(
 			node_url=config.node_url,
 			market_id=market_id, 
 			duration=config.change_duration, 
 			granularity=config.change_interval, 
-			decimals=int(self.market_lookup[market_id]['decimalPlaces']))
+			decimals=decimals)
 		return c and enrich_candle(zip_candles(c)[0])
-
-	@cached(config.history_cache_ttl)
-	def price_history(self, market_id):
+	
+	def _get_price_history(self, market_id, decimals):
 		return [x['close'] for x in 
 				zip_candles(
 					candles(
@@ -89,38 +111,45 @@ class TickerService:
 							market_id=market_id, 
 							duration=config.change_duration, 
 							granularity=config.history_granularity,
-							decimals=int(self.market_lookup[market_id]['decimalPlaces'])), 
+							decimals=decimals), 
 					step=config.history_step)]
 
-	@cached(config.market_cache_ttl)
-	def ticker(self, history=True):
-		return [x for x in [self.ticker_entry(market_id=id, history=history) for id in self.market_lookup.keys()] if x['price_data']]
-
-	@cached(config.market_cache_ttl)
-	def ticker_entry(self, market_id: str, history=True) -> TickerEntry:
-		market = self.market_lookup.get(market_id, None)
-		return market and {
-			'id': market['id'],
-			'code': market['tradableInstrument']['instrument']['code'],
-			'name': market['tradableInstrument']['instrument']['name'],
-      'status': market['state'],
-			'price_data': self.price_data_for_market(market_id=market_id),
-			**({ 'history': self.price_history(market_id=market_id) } if history else {})
-		}
-
-	@cached(config.market_cache_ttl)
-	def markets(self):
-		return list(self.market_lookup.values())
-
-	@cached(config.stats_cache_ttl)
-	def stats(self):
-		return get(API.STATS()).json()['statistics']	
-
-	@cached(config.news_cache_ttl)
-	def news(self):		
+	def _get_news(self):		
 		sources = [news_market_data, news_markets, news_proposals]
 		news = []
 		for source in sources:
 			news.extend(source.get_news(config.node_url))
 		return sorted(news, key=lambda x: x.timestamp)
-	
+
+	@cached(config.market_cache_ttl)
+	def ticker(self, history=True) -> List[TickerEntry]:
+		with self._data_mutex:
+			market_ids = self._market_lookup.keys()
+		return [x for x in [self.ticker_entry(market_id=id, history=history) for id in market_ids] if x['price_data']]
+
+	@cached(config.market_cache_ttl)
+	def ticker_entry(self, market_id: str, history=True) -> TickerEntry:
+		with self._data_mutex:
+			market = self._market_lookup.get(market_id, None)
+			return market and {
+				'id': market['id'],
+				'code': market['tradableInstrument']['instrument']['code'],
+				'name': market['tradableInstrument']['instrument']['name'],
+				'status': market['state'],
+				'price_data': self._price_details[market_id],
+				**({ 'history': self._price_history[market_id] } if history else {})
+			}
+
+	# @cached(config.market_cache_ttl)
+	def news(self) -> List[NewsItem]:
+		with self._data_mutex:
+			return self._news
+
+	@cached(config.market_cache_ttl)
+	def markets(self):
+		with self._data_mutex:
+			return list(self._market_lookup.values())
+
+	@cached(config.stats_cache_ttl)
+	def stats(self):
+		return get(API.STATS()).json()['statistics']	
