@@ -4,7 +4,7 @@ from pydantic.main import BaseModel
 from requests import get
 from datetime import datetime
 from time import sleep
-import multiprocessing
+import threading
 
 import cachetools
 from pydantic import BaseSettings
@@ -71,9 +71,9 @@ class TickerEntry(BaseModel):
 
 class TickerService:
 	def __init__(self):
-		self._data_mutex = multiprocessing.Lock()
+		self._data_mutex = threading.Lock()
 		self.update()
-		update_thread = multiprocessing.Process(target=self.update_periodically, args=())
+		update_thread = threading.Thread(target=self.update_periodically, args=())
 		update_thread.daemon = True
 		update_thread.start()
 
@@ -148,7 +148,7 @@ class TickerService:
 				**({ 'history': self._price_history[market_id] } if history else {})
 			}
 
-	# @cached(config.market_cache_ttl)
+	@cached(config.market_cache_ttl)
 	def news(self) -> List[NewsItem]:
 		with self._data_mutex:
 			return self._news
