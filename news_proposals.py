@@ -59,7 +59,7 @@ def new_market_news(p, ph):
 	if state in ['STATE_OPEN']:
 		if abs(since) < abs(until):
 			return NewsItem(
-				timestamp=[p['closingTimestamp']], 
+				timestamp=p['proposal']['terms']['closingTimestamp'], 
 				type=ItemType.market_proposal, 
 				subtype='proposed', 
 				message=f'Market proposed: {name}',
@@ -75,7 +75,7 @@ def new_market_news(p, ph):
 				url=console_urls.proposal(p['proposal']['id']))
 	elif state in ['STATE_DECLINED', 'STATE_FAILED']:
 		return NewsItem(
-			timestamp=p['closingTimestamp'], 
+			timestamp=p['proposal']['terms']['closingTimestamp'], 
 			type=ItemType.market_proposal, 
 			subtype='failed', 
 			message=f'Market proposal failed: {name}',
@@ -83,7 +83,7 @@ def new_market_news(p, ph):
 			url=console_urls.proposal(p['proposal']['id']))
 	elif state in ['STATE_PASSED']:
 		return NewsItem(
-			timestamp=p['closingTimestamp'], 
+			timestamp=p['proposal']['terms']['closingTimestamp'], 
 			type=ItemType.market_proposal, 
 			subtype='passed', 
 			message=f'New market approved: {name}',
