@@ -54,7 +54,7 @@ def get_type(p):
 def new_market_news(p, ph):
 	state = p['proposal']['state']
 	since, until = get_countdown(p, ph)
-	name = p['proposal']['terms']['newMarket']['changes']['instrument']['name']
+	name = p['proposal']['terms']['newMarket']['changes']['instrument']['code']
 	now = datetime.now().timestamp()
 	if state in ['STATE_OPEN']:
 		if abs(since) < abs(until):
@@ -62,7 +62,7 @@ def new_market_news(p, ph):
 				timestamp=[p['closingTimestamp']], 
 				type=ItemType.market_proposal, 
 				subtype='proposed', 
-				message=f'New market proposed: {name}',
+				message=f'Market proposed: {name}',
 				subject=name,
 				url=console_urls.proposal(p['proposal']['id']))
 		else:
@@ -70,7 +70,7 @@ def new_market_news(p, ph):
 				timestamp=now, 
 				type=ItemType.market_proposal, 
 				subtype='closing', 
-				message=f'Voting on new market closes soon: {name}',
+				message=f'Voting now! Closing soon: {name}',
 				subject=name,
 				url=console_urls.proposal(p['proposal']['id']))
 	elif state in ['STATE_DECLINED', 'STATE_FAILED']:
@@ -78,7 +78,7 @@ def new_market_news(p, ph):
 			timestamp=p['closingTimestamp'], 
 			type=ItemType.market_proposal, 
 			subtype='failed', 
-			message=f'New market failed to win approval: {name}',
+			message=f'Market proposal failed: {name}',
 				subject=name,
 			url=console_urls.proposal(p['proposal']['id']))
 	elif state in ['STATE_PASSED']:

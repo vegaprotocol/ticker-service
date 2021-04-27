@@ -18,7 +18,7 @@ def proc_ts(ts):
 
 def get_market_news(lookup, m):
 	mkt = lookup[m['market']]
-	name = mkt['tradableInstrument']['instrument']['name']
+	name = mkt['tradableInstrument']['instrument']['code']
 	auction_start = int(m['auctionStart']) / 10**9
 	auction_trigger = m['trigger']
 	if auction_start != 0 and auction_trigger == 'AUCTION_TRIGGER_LIQUIDITY':
@@ -26,7 +26,7 @@ def get_market_news(lookup, m):
 			timestamp=auction_start,
 			type=ItemType.market_status,
 			subtype='liquidity_auction',
-			message=f'Market entered liquidity monitoring auction: {name}',
+			message=f'Market in liquidity  auction: {name}',
 			subject=name,
 			url=console_urls.market(mkt['id']))		
 	elif auction_start != 0 and auction_trigger == 'AUCTION_TRIGGER_PRICE':
@@ -34,7 +34,7 @@ def get_market_news(lookup, m):
 			timestamp=auction_start,
 			type=ItemType.market_status,
 			subtype='price_auction',
-			message=f'Market entered price monitoring auction: {name}',
+			message=f'Market in price monitoring: {name}',
 			subject=name,
 			url=console_urls.market(mkt['id']))			
 	else:

@@ -12,7 +12,7 @@ def proc_ts(ts):
 
 
 def get_market_news(m):
-	name = m['tradableInstrument']['instrument']['name']
+	name = m['tradableInstrument']['instrument']['code']
 	ts = m['marketTimestamps']
 	# proposed = proc_ts(ts['proposed'])
 	pending = proc_ts(ts['pending'])
@@ -24,7 +24,7 @@ def get_market_news(m):
 			timestamp=close,
 			type=ItemType.market_status,
 			subtype='closed',
-			message=f'Market closed for trading: {name}',
+			message=f'Market closed: {name}',
 			subject=name,
 			url=console_urls.market(m['id']))
 	elif open < now:
@@ -32,7 +32,7 @@ def get_market_news(m):
 			timestamp=open,
 			type=ItemType.market_status,
 			subtype='opened',
-			message=f'New market open for trading: {name}',
+			message=f'New market: {name}',
 			subject=name,
 			url=console_urls.market(m['id']))
 	elif pending < now:
@@ -41,7 +41,7 @@ def get_market_news(m):
 			type=ItemType.market_status,
 			subtype='opening',
 			subject=name,
-			message=f'New market in opening auction: {name}',
+			message=f'Market in opening auction: {name}',
 			url=console_urls.market(m['id']))
 	else:
 		return None
