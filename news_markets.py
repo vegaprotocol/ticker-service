@@ -13,6 +13,7 @@ def proc_ts(ts):
 
 def get_market_news(m):
 	name = m['tradableInstrument']['instrument']['code']
+	state = m['state']
 	ts = m['marketTimestamps']
 	# proposed = proc_ts(ts['proposed'])
 	pending = proc_ts(ts['pending'])
@@ -27,7 +28,7 @@ def get_market_news(m):
 			message=f'Market closed: {name}',
 			subject=name,
 			url=console_urls.market(m['id']))
-	elif open < now:
+	elif open < now and state == 'STATE_ACTIVE':
 		return NewsItem(
 			timestamp=open,
 			type=ItemType.market_status,
