@@ -36,7 +36,7 @@ def get_market_news(m):
 			message=f'New market: {name}',
 			subject=name,
 			url=console_urls.market(m['id']))
-	elif pending < now:
+	elif pending < now and state == 'STATE_PENDING':
 		return NewsItem(
 			timestamp=pending,
 			type=ItemType.market_status,
