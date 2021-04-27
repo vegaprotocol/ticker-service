@@ -33,7 +33,7 @@ def get_market_news(m):
 			timestamp=open,
 			type=ItemType.market_status,
 			subtype='opened',
-			message=f'New market: {name}',
+			message=f'Market created: {name}',
 			subject=name,
 			url=console_urls.market(m['id']))
 	elif pending < now and state == 'STATE_PENDING':
