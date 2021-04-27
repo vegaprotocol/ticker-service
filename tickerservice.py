@@ -4,7 +4,7 @@ from pydantic.main import BaseModel
 from requests import get
 from datetime import datetime
 from time import sleep
-import multiprocessing
+import threading
 
 import cachetools
 from pydantic import BaseSettings
@@ -69,9 +69,9 @@ class TickerEntry(BaseModel):
 
 class TickerService:
 	def __init__(self):
-		self._data_mutex = multiprocessing.Lock()
+		self._data_mutex = threading.Lock()
 		self.update()
-		multiprocessing.Process(target=self.update_periodically, args=()).start()
+		threading.Thread(target=self.update_periodically, args=()).start()
 
 	def update_periodically(self):
 		while True:
