@@ -4,7 +4,7 @@ from pydantic.main import BaseModel
 from requests import get
 from datetime import datetime
 from time import sleep
-import threading
+import multiprocessing
 
 import cachetools
 from pydantic import BaseSettings
@@ -26,6 +26,8 @@ class Config(BaseSettings):
 	change_duration: int
 	history_granularity: str
 	history_step: int
+	news_min_items: int
+	news_safe_age: int
 	update_freq: float
 
 	@property
@@ -69,9 +71,11 @@ class TickerEntry(BaseModel):
 
 class TickerService:
 	def __init__(self):
-		self._data_mutex = threading.Lock()
+		self._data_mutex = multiprocessing.Lock()
 		self.update()
-		threading.Thread(target=self.update_periodically, args=()).start()
+		update_thread = multiprocessing.Process(target=self.update_periodically, args=())
+		update_thread.daemon = True
+		update_thread.start()
 
 	def update_periodically(self):
 		while True:
@@ -116,10 +120,14 @@ class TickerService:
 
 	def _get_news(self):		
 		sources = [news_market_data, news_markets, news_proposals]
-		news = []
+		news: List[NewsItem] = []
+		now = datetime.now().timestamp()
 		for source in sources:
 			news.extend(source.get_news(config.node_url))
-		return sorted(news, key=lambda x: x.timestamp)
+		news.sort(key=lambda x: x.timestamp)
+		while len(news) > config.news_min_items and now - news[0].timestamp.timestamp() > config.news_safe_age:
+			del news[0]
+		return news
 
 	@cached(config.market_cache_ttl)
 	def ticker(self, history=True) -> List[TickerEntry]:

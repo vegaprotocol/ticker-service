@@ -59,7 +59,7 @@ def new_market_news(p, ph):
 	if state in ['STATE_OPEN']:
 		if abs(since) < abs(until):
 			return NewsItem(
-				timestamp=p['proposal']['terms']['closingTimestamp'], 
+				timestamp=p['proposal']['timestamp'], 
 				type=ItemType.market_proposal, 
 				subtype='proposed', 
 				message=f'Market proposed: {name}',
