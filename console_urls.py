@@ -2,7 +2,7 @@ import json
 import base64
 
 
-root_url = 'https://testnet.vega.trading'
+root_url = 'https://console.fairground.wtf'
 
 
 def view(root_url, view, **props):
