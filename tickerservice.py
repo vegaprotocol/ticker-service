@@ -80,7 +80,10 @@ class TickerService:
 	def update_periodically(self):
 		while True:
 			sleep(config.update_freq)
-			self.update()
+			try:
+				self.update()
+			finally:
+				pass
 
 	def update(self):
 		print(f'Started updating ticker data')
