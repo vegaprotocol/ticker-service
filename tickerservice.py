@@ -170,4 +170,7 @@ class TickerService:
 
 	@cached(config.stats_cache_ttl)
 	def stats(self):
-		return get(API.STATS()).json()['statistics']	
+		try:
+			return get(API.STATS()).json()['statistics']	
+		except:
+			return dict(error='Error getting stats (node may be down)')
