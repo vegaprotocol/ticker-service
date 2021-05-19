@@ -1,3 +1,4 @@
+from datetime import datetime
 from news import NewsItem
 from typing import List
 from fastapi import FastAPI, HTTPException
@@ -53,3 +54,10 @@ def get_news():
 	Returns news announcements
 	"""
 	return ts.news()
+
+@app.get('/timestamp', response_model=datetime)
+def get_timestamp():
+	"""
+	Returns the timestamp of the last completed data update
+	"""
+	return ts._timestamp

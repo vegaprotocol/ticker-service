@@ -71,6 +71,7 @@ class TickerEntry(BaseModel):
 
 class TickerService:
 	def __init__(self):
+		self._timestamp = None
 		self._data_mutex = threading.Lock()
 		self.update()
 		update_thread = threading.Thread(target=self.update_periodically, args=())
@@ -94,11 +95,17 @@ class TickerService:
 		news = self._get_news()
 
 		with self._data_mutex:
+			self._all_markets = None
+			self._market_lookup = None
+			self._price_details = None
+			self._price_history = None
+			self._news = None
 			self._all_markets = all_markets
 			self._market_lookup = market_lookup
 			self._price_details = price_details
 			self._price_history = price_history
 			self._news = news
+			self._timestamp = datetime.now()
 		print(f'Update complete: {len(self._all_markets)} markets, {len(self._news)} news items')
 
 	def _get_price_data(self, market_id, decimals):
