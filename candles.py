@@ -21,8 +21,11 @@ INTERVAL = {
 def candles(*, node_url, market_id, duration, granularity, decimals, step=1):
 	period_start = (datetime.now().timestamp() - duration) * (10 ** 9) 
 	req = API(node_url=node_url, market_id=market_id, since_timestamp=period_start, interval=granularity)
-	if len(c := get(req).json()['candles']) == 0: return None
-	return list(map(partial(process_candle_data, decimals=decimals), c))
+	try:
+		if len(c := get(req).json()['candles']) == 0: return None
+		return list(map(partial(process_candle_data, decimals=decimals), c))
+	except:
+		return None
 
 def process_candle_data(candle, *, decimals):
 	del candle['timestamp']
