@@ -88,12 +88,16 @@ class TickerService:
 
 	def update(self):
 		print(f'Started updating ticker data')
-		all_markets = get(API.MARKETS()).json()['markets']
-		market_lookup = { m['id']:m for m in all_markets if m['state'] not in config.exclude_market_states }
-		price_details = { id:self._get_price_data(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
-		price_history = { id:self._get_price_history(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
-		news = self._get_news()
 
+		try:
+			all_markets = get(API.MARKETS()).json()['markets']
+			market_lookup = { m['id']:m for m in all_markets if m['state'] not in config.exclude_market_states }
+			price_details = { id:self._get_price_data(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
+			price_history = { id:self._get_price_history(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
+			news = self._get_news()
+		except:
+			return
+                
 		with self._data_mutex:
 			self._all_markets = None
 			self._market_lookup = None
