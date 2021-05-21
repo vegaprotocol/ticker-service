@@ -94,8 +94,8 @@ def new_market_news(p, ph):
 
 
 def news_item(p):
-	ph = PROPOSAL_MAPPING[p['proposal']['state']]
-	if 'newMarket' in p['proposal']['terms']: 
+	ph = PROPOSAL_MAPPING[p['proposal']['state']] if p['proposal']['state'] in PROPOSAL_MAPPING else None
+	if ph and 'newMarket' in p['proposal']['terms']: 
 		return new_market_news(p, ph)
 	else:
 		return None  #TODO: handle other proposal types
