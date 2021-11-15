@@ -9,6 +9,7 @@ MARKETS_API = '{node_url}/markets'.format
 
 def get_market_info(node_url):
 	markets = get(MARKETS_API(node_url=node_url)).json()['markets']
+	print(__file__ + '/get_market_info: Got markets: ' + ', '.join(m['id'] for m in markets))
 	return { m['id']:m for m in markets }
 
 
@@ -44,6 +45,7 @@ def get_market_news(lookup, m):
 def get_news(node_url):
 	lookup = get_market_info(node_url)
 	market_data = get(DATA_API(node_url=node_url)).json()['marketsData']
+	print(__file__ + '/get_news: Got market data: ' + repr(market_data))
 	return list(filter(lambda x: x is not None, map(partial(get_market_news, lookup), market_data)))
 
 

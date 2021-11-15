@@ -95,7 +95,8 @@ class TickerService:
 			price_details = { id:self._get_price_data(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
 			price_history = { id:self._get_price_history(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
 			news = self._get_news()
-		except:
+		except Exception as e:
+			print(__file__ + '/update: an error occurred: ' + repr(e))
 			return
                 
 		with self._data_mutex:
