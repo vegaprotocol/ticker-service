@@ -6,7 +6,7 @@ from news import NewsItem, ItemType
 import console_urls
 
 
-API = '{node_url}/governance/proposals'.format
+API = '{node_url}/datanode/rest/governance/proposals'.format
 
 
 class ProposalHandling(BaseModel):

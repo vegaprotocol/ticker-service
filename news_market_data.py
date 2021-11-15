@@ -3,7 +3,7 @@ from news import NewsItem, ItemType
 from functools import partial
 import console_urls
 
-DATA_API = '{node_url}/markets-data'.format
+DATA_API = '{node_url}/datanode/rest/markets-data'.format
 MARKETS_API = '{node_url}/markets'.format
 
 
@@ -45,7 +45,7 @@ def get_market_news(lookup, m):
 def get_news(node_url):
 	lookup = get_market_info(node_url)
 	market_data = get(DATA_API(node_url=node_url)).json()['marketsData']
-	print(__file__ + '/get_news: Got market data: ' + repr(market_data))
+	print(__file__ + '/get_news: Got market data: ' + ', '.join(repr((d['market'][:5]+'…', d['markPrice'])) for d in market_data))
 	return list(filter(lambda x: x is not None, map(partial(get_market_news, lookup), market_data)))
 
 
