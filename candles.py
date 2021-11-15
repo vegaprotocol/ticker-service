@@ -3,7 +3,7 @@ from requests import get
 from datetime import datetime
 
 
-API = '{node_url}/markets/{market_id}/candles?since_timestamp={since_timestamp:.0f}&interval={interval}'.format
+API = '{node_url}/datanode/rest/markets/{market_id}/candles?since_timestamp={since_timestamp:.0f}&interval={interval}'.format
 
 PRICE_FLOAT_FIELDS = ['open', 'close', 'high', 'low']
 PRICE_INT_FIELDS = ['volume']

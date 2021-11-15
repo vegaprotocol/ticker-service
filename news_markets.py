@@ -4,7 +4,7 @@ from news import NewsItem, ItemType
 import console_urls
 
 
-API = '{node_url}/markets'.format
+API = '{node_url}/datanode/rest/markets'.format
 
 
 def proc_ts(ts):

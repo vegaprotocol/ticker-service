@@ -154,6 +154,7 @@ class TickerService:
 	def ticker_entry(self, market_id: str, history=True) -> TickerEntry:
 		with self._data_mutex:
 			market = self._market_lookup.get(market_id, None)
+			print(__file__ + '/ticker_entry: got price details for ' + market_id + ': ' + repr(self._price_details[market_id]))
 			return market and {
 				'id': market['id'],
 				'code': market['tradableInstrument']['instrument']['code'],

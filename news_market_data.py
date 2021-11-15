@@ -4,7 +4,7 @@ from functools import partial
 import console_urls
 
 DATA_API = '{node_url}/datanode/rest/markets-data'.format
-MARKETS_API = '{node_url}/markets'.format
+MARKETS_API = '{node_url}/datanode/rest/markets'.format
 
 
 def get_market_info(node_url):
