@@ -20,7 +20,7 @@ def get_market_news(m):
 	open = proc_ts(ts['open'])
 	close = proc_ts(ts['close'])
 	now = datetime.now().timestamp()
-	if close < now:
+	if close > 0 and close < now:
 		return NewsItem(
 			timestamp=close,
 			type=ItemType.market_status,
