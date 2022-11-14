@@ -44,8 +44,8 @@ def cached(ttl):
 
 
 class API:
-	MARKETS = (config.node_url + '/datanode/rest/markets').format
-	MARKET_DATA = (config.node_url + '/datanode/rest/markets-data/{market_id}').format
+	MARKETS = (config.node_url + '/api/v2/markets').format
+	MARKET_DATA = (config.node_url + '/api/v2/markets-data/{market_id}').format
 	STATS = (config.node_url + '/statistics').format
 
 
