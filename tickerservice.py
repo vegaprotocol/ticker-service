@@ -71,6 +71,11 @@ class TickerEntry(BaseModel):
 
 class TickerService:
 	def __init__(self):
+		self._all_markets = None
+		self._market_lookup = None
+		self._price_details = None
+		self._price_history = None
+		self._news = None
 		self._timestamp = None
 		self._data_mutex = threading.Lock()
 		self.update()
