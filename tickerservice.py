@@ -5,6 +5,7 @@ from requests import get
 from datetime import datetime
 from time import sleep
 import threading
+import traceback
 
 import cachetools
 from pydantic import BaseSettings
@@ -45,7 +46,7 @@ def cached(ttl):
 
 class API:
 	MARKETS = (config.node_url + '/api/v2/markets').format
-	MARKET_DATA = (config.node_url + '/api/v2/markets-data/{market_id}').format
+	MARKET_DATA = (config.node_url + '/api/v2/markets/data/{market_id}').format
 	STATS = (config.node_url + '/statistics').format
 
 
@@ -95,13 +96,15 @@ class TickerService:
 		print(f'Started updating ticker data')
 
 		try:
-			all_markets = get(API.MARKETS()).json()['markets']
+			all_markets_resp = get(API.MARKETS()).json()
+			all_markets = [r['node'] for r in all_markets_resp['markets']['edges']]
 			market_lookup = { m['id']:m for m in all_markets if m['state'] not in config.exclude_market_states }
 			price_details = { id:self._get_price_data(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
 			price_history = { id:self._get_price_history(id, int(market_lookup[id]['decimalPlaces'])) for id in market_lookup.keys() }
 			news = self._get_news()
 		except Exception as e:
 			print(__file__ + '/update: an error occurred: ' + repr(e))
+			traceback.print_exception(type(e), e, e.__traceback__)
 			return
                 
 		with self._data_mutex:

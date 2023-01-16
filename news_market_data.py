@@ -3,12 +3,13 @@ from news import NewsItem, ItemType
 from functools import partial
 import console_urls
 
-DATA_API = '{node_url}/datanode/rest/markets-data'.format
-MARKETS_API = '{node_url}/datanode/rest/markets'.format
+DATA_API = '{node_url}/api/v2/markets/data'.format
+MARKETS_API = '{node_url}/api/v2/markets'.format
 
 
 def get_market_info(node_url):
-	markets = get(MARKETS_API(node_url=node_url)).json()['markets']
+	markets_resp = get(MARKETS_API(node_url=node_url)).json()
+	markets = [m['node'] for m in markets_resp['markets']['edges']]
 	print(__file__ + '/get_market_info: Got markets: ' + ', '.join(m['id'] for m in markets))
 	return { m['id']:m for m in markets }
 
@@ -37,7 +38,7 @@ def get_market_news(lookup, m):
 			subtype='price_auction',
 			message=f'Market in price monitoring: {name}',
 			subject=name,
-			url=console_urls.market(mkt['id']))			
+			url=console_urls.market(mkt['id']))
 	else:
 		return None
 

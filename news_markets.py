@@ -4,7 +4,7 @@ from news import NewsItem, ItemType
 import console_urls
 
 
-API = '{node_url}/datanode/rest/markets'.format
+API = '{node_url}/api/v2/markets'.format
 
 
 def proc_ts(ts):
@@ -49,7 +49,8 @@ def get_market_news(m):
 
 
 def get_news(node_url):
-	markets = get(API(node_url=node_url)).json()['markets']
+	markets_resp = get(API(node_url=node_url)).json()
+	markets = [m['node'] for m in markets_resp['markets']['edges']]
 	return list(filter(lambda x: x is not None, map(get_market_news, markets)))
 
 

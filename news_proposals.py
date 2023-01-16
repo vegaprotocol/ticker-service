@@ -6,7 +6,7 @@ from news import NewsItem, ItemType
 import console_urls
 
 
-API = '{node_url}/datanode/rest/governance/proposals'.format
+API = '{node_url}/api/v2/governances'.format
 
 
 class ProposalHandling(BaseModel):
@@ -25,7 +25,8 @@ PROPOSAL_MAPPING = {
 
 
 def get_news(node_url):
-	proposals = get(API(node_url=node_url)).json()['data']
+	proposals_resp = get(API(node_url=node_url)).json()
+	proposals = [p['node'] for p in proposals_resp['connection']['edges']]
 	for p in proposals:
 		sort_timestamps(p)
 	return list(filter(lambda x: x is not None, map(news_item, proposals)))

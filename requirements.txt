@@ -1,3 +1,5 @@
 fastapi
 pydantic[dotenv]
 cachetools
+requests
+uvicorn[standard]
