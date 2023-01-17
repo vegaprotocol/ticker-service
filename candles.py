@@ -32,6 +32,10 @@ def dumb_candle_id(market_id, interval):
 
 
 def candles(*, node_url, market_id, duration, granularity, decimals, step=1):
+	'''
+	Get candle data from the API and processes it to turn strings into numbers. 
+	This function does *not* enrich the candles because you may want to zip them before doing that.
+	'''
 	period_start = (datetime.now().timestamp() - duration) * (10 ** 9) 
 	candle_id = dumb_candle_id(market_id=market_id, interval=granularity)
 	req = API(node_url=node_url, candle_id=candle_id, since_timestamp=period_start, interval=granularity)
@@ -43,9 +47,9 @@ def candles(*, node_url, market_id, duration, granularity, decimals, step=1):
 		return None
 
 def process_candle_data(candle, *, decimals):
-	print(candle)
-	# del candle['start']
-	# del candle['lastUpdate']
+	'''
+	Turns strings in candle response into numbers.
+	'''
 	for k, v in candle.items():
 		if k in PRICE_FLOAT_FIELDS:
 			candle[k] = float(v) / (10 ** decimals) 
@@ -54,6 +58,9 @@ def process_candle_data(candle, *, decimals):
 	return candle
 
 def enrich_candle(candle):
+	'''
+	Adds fraction change and gainer/loser tag to processed candle data.
+	'''
 	candle ['change'] = (candle['close'] - candle['open']) / candle['open']
 	candle['action'] = \
 		'gainer' if candle['close'] > candle['open'] else \
@@ -61,10 +68,14 @@ def enrich_candle(candle):
 	return candle
 
 def zip_candles(candles, *, step=None):
+	'''
+	Combines processed candles into larger buckets, e.g. candles = 15 min candles and step = 2 returns 30 min candles.
+	candles: list of input candle data
+	step: number of input candles to combine together (combines the *entire*) input if None or omitted
+	'''
 	res, chunk, rest = [], [], list(candles or [])
 	while len(rest) > 0:
 		chunk, rest = rest[:step or len(candles)], rest[step or len(candles):]
-		print(chunk)
 		res.append({
 			'datetime': chunk[-1]['start'],
 			'open': chunk[0]['open'],

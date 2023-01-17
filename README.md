@@ -9,3 +9,11 @@ This repository is a community contribution and may not actively monitored by it
 A very simple caching ticker service for Fairground, powers the ticket at https://fairground.wtf. 
 
 Might be running at https://ticker.vega.win (try [/docs](https://ticker.vega.win/docs) or [/ticker](https://ticker.vega.win/ticker) or [/news](https://ticker.vega.win/news)).
+
+To run (with dev reloading):
+
+```
+pip3 install -r requirements.txt
+uvicorn main:app --reload
+
+```

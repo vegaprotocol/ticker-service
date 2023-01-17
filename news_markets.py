@@ -15,7 +15,6 @@ def get_market_news(m):
 	name = m['tradableInstrument']['instrument']['code']
 	state = m['state']
 	ts = m['marketTimestamps']
-	# proposed = proc_ts(ts['proposed'])
 	pending = proc_ts(ts['pending'])
 	open = proc_ts(ts['open'])
 	close = proc_ts(ts['close'])
